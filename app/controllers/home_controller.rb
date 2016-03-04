@@ -7,6 +7,7 @@ class HomeController < AuthenticatedController
 
     5.times { create_infested_product }
     5.times { create_infested_customer }
+    5.times { create_infested_order }
   end
 
   private
@@ -46,6 +47,8 @@ class HomeController < AuthenticatedController
       barcode: xss,
     }]
     product.save
+    @variants ||= []
+    @variants << product.variants.first.id
   end
 
   def create_infested_customer
@@ -54,6 +57,21 @@ class HomeController < AuthenticatedController
     customer.note = xss
     customer.tags = [xss, xss]
     customer.save
+  end
+
+  def create_infested_order
+    order = ShopifyAPI::Order.new
+    order.email = xss_email
+    order.financial_status = "paid"
+    order.send_receipt = false
+    order.send_fulfillment_receipt = false
+    order.line_items = [
+      {
+        variant_id: @variants.sample,
+        quantity: 1
+      }
+    ]
+    order.save
   end
 
   def alert_count
