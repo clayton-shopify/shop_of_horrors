@@ -6,6 +6,7 @@ class HomeController < AuthenticatedController
     install_alert_blocker
 
     5.times { create_infested_product }
+    5.times { create_infested_customer }
   end
 
   private
@@ -45,6 +46,14 @@ class HomeController < AuthenticatedController
       barcode: xss,
     }]
     product.save
+  end
+
+  def create_infested_customer
+    customer = ShopifyAPI::Customer.new
+    customer.email = xss_email
+    customer.note = xss
+    customer.tags = [xss, xss]
+    customer.save
   end
 
   def alert_count
